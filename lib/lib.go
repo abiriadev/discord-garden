@@ -37,7 +37,16 @@ func Rank(qapi api.QueryAPI) map[string]int {
 	rankMap := map[string]int{}
 
 	for res.Next() {
-		rankMap[res.Record().ValueByKey("id").(string)] = res.Record().Value().(int)
+		var id string
+
+		switch v := res.Record().ValueByKey("id").(type) {
+		case string:
+			id = v
+		case nil:
+			id = "anon"
+		}
+
+		rankMap[id] = int(res.Record().Value().(int64))
 	}
 
 	if res.Err() != nil {
