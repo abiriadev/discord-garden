@@ -19,7 +19,12 @@ func Record(wapi api.WriteAPIBlocking, id string, point int, when time.Time) {
 	}
 }
 
-func Rank(qapi api.QueryAPI) map[string]int {
+type RankRecord struct {
+	Id    string
+	Point int
+}
+
+func Rank(qapi api.QueryAPI) []RankRecord {
 	res, err := qapi.Query(
 		context.Background(),
 		`from(bucket: "hello")
@@ -34,7 +39,7 @@ func Rank(qapi api.QueryAPI) map[string]int {
 		panic(err)
 	}
 
-	rankMap := map[string]int{}
+	rankMap := []RankRecord{}
 
 	for res.Next() {
 		var id string
@@ -46,7 +51,10 @@ func Rank(qapi api.QueryAPI) map[string]int {
 			id = "anon"
 		}
 
-		rankMap[id] = int(res.Record().Value().(int64))
+		rankMap = append(rankMap, RankRecord{
+			Id:    id,
+			Point: int(res.Record().Value().(int64)),
+		})
 	}
 
 	if res.Err() != nil {
