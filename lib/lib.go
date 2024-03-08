@@ -1,4 +1,4 @@
-package main
+package lib
 
 import (
 	"context"
@@ -8,22 +8,27 @@ import (
 	"github.com/influxdata/influxdb-client-go/v2/api"
 )
 
-func Record(wapi api.WriteAPIBlocking, id string, content string) {
+func Record(wapi api.WriteAPIBlocking, id string, point int, when time.Time) {
 	p := influxdb2.NewPointWithMeasurement("chat").
 		AddTag("id", id).
-		AddField("content", content).
-		SetTime(time.Now())
+		AddField("content", point).
+		SetTime(when)
 
 	if err := wapi.WritePoint(context.Background(), p); err != nil {
 		panic(err)
 	}
 }
 
-func InitClient(addr string, token string, org string, bucket string) api.WriteAPIBlocking {
+func InitClient(
+	addr string,
+	token string,
+	org string,
+	bucket string,
+) (api.QueryAPI, api.WriteAPIBlocking) {
 	client := influxdb2.NewClient(
 		addr,
 		token,
 	)
 
-	return client.WriteAPIBlocking(org, bucket)
+	return client.QueryAPI(org), client.WriteAPIBlocking(org, bucket)
 }
