@@ -31,7 +31,7 @@ func Rank(qapi api.QueryAPI) []RankRecord {
 			|> range(start: 0)
 			|> filter(fn: (r) => r["_measurement"] == "chat")
 			|> group(columns: ["id"])
-			|> count()
+			|> sum(column: "_value")
 			|> group()
 			|> sort(columns: ["_value"], desc: true)
 			|> limit(n: 10)`,
