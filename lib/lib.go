@@ -11,7 +11,7 @@ import (
 func Record(wapi api.WriteAPIBlocking, id string, point int, when time.Time) {
 	p := influxdb2.NewPointWithMeasurement("chat").
 		AddTag("id", id).
-		AddField("content", point).
+		AddField("point", point).
 		SetTime(when)
 
 	if err := wapi.WritePoint(context.Background(), p); err != nil {
@@ -33,7 +33,8 @@ func Rank(qapi api.QueryAPI) []RankRecord {
 			|> group(columns: ["id"])
 			|> count()
 			|> group()
-			|> sort(columns: ["_value"], desc: true)`,
+			|> sort(columns: ["_value"], desc: true)
+			|> limit(n: 10)`,
 	)
 	if err != nil {
 		panic(err)
