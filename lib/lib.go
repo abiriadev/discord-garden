@@ -28,7 +28,7 @@ func Rank(qapi api.QueryAPI) []RankRecord {
 	res, err := qapi.Query(
 		context.Background(),
 		`from(bucket: "hello")
-			|> range(start: -6d)
+			|> range(start: 0)
 			|> filter(fn: (r) => r["_measurement"] == "chat")
 			|> group(columns: ["id"])
 			|> count()
