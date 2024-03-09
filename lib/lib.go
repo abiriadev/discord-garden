@@ -30,9 +30,9 @@ func Rank(qapi api.QueryAPI) []RankRecord {
 	var buf strings.Builder
 
 	if tmpl, err := template.New("rank").Parse(
-		`from(bucket: "hello")
+		`from(bucket: {{.Bucket}})
 			|> range(start: 0)
-			|> filter(fn: (r) => r["_measurement"] == "chat")
+			|> filter(fn: (r) => r["_measurement"] == {{.Measurement}})
 			|> group(columns: ["id"])
 			|> sum(column: "_value")
 			|> group()
@@ -40,7 +40,15 @@ func Rank(qapi api.QueryAPI) []RankRecord {
 			|> limit(n: {{.Limit}})`,
 	); err != nil {
 		panic(err)
-	} else if err := tmpl.Execute(&buf, struct{ Limit int }{10}); err != nil {
+	} else if err := tmpl.Execute(&buf, struct {
+		Bucket      string
+		Measurement string
+		Limit       int
+	}{
+		"hello",
+		"chat",
+		10,
+	}); err != nil {
 		panic(err)
 	}
 
