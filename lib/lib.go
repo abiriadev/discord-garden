@@ -30,9 +30,9 @@ func Rank(qapi api.QueryAPI) []RankRecord {
 	var buf strings.Builder
 
 	if tmpl, err := template.New("rank").Parse(
-		`from(bucket: {{.Bucket}})
+		`from(bucket: "{{.Bucket}}")
 			|> range(start: 0)
-			|> filter(fn: (r) => r["_measurement"] == {{.Measurement}})
+			|> filter(fn: (r) => r["_measurement"] == "{{.Measurement}}")
 			|> group(columns: ["id"])
 			|> sum(column: "_value")
 			|> group()
@@ -84,10 +84,10 @@ func Rank(qapi api.QueryAPI) []RankRecord {
 func Garden(qapi api.QueryAPI) []int {
 	var buf strings.Builder
 
-	if tmpl, err := template.New("rank").Parse(
-		`from(bucket: {{.Bucket}})
+	if tmpl, err := template.New("garden").Parse(
+		`from(bucket: "{{.Bucket}}")
 			|> range(start: {{.Start}})
-			|> filter(fn: (r) => r["_measurement"] == {{.Measurement}} and r.id == {{.Id}})
+			|> filter(fn: (r) => r["_measurement"] == "{{.Measurement}}" and r.id == "{{.Id}}")
 			|> aggregateWindow(
 				every: {{.Window}},
 				fn: (column, tables=<-) =>
@@ -100,11 +100,13 @@ func Garden(qapi api.QueryAPI) []int {
 		Bucket      string
 		Start       string
 		Measurement string
+		Id          string
 		Window      string
 	}{
 		"hello",
 		"-1h",
 		"chat",
+		"662201438621138954",
 		"1m",
 	}); err != nil {
 		panic(err)
