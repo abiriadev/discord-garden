@@ -82,16 +82,37 @@ func Rank(qapi api.QueryAPI) []RankRecord {
 }
 
 func Garden(qapi api.QueryAPI) []int {
-	res, err := qapi.Query(context.Background(),
-		`from(bucket: "hello")
-			|> range(start: -1h)
-			|> filter(fn: (r) => r["_measurement"] == "chat" and r.id == "662201438621138954")
+	var buf strings.Builder
+
+	if tmpl, err := template.New("rank").Parse(
+		`from(bucket: {{.Bucket}})
+			|> range(start: {{.Start}})
+			|> filter(fn: (r) => r["_measurement"] == {{.Measurement}} and r.id == {{.Id}})
 			|> aggregateWindow(
-				every: 1m,
+				every: {{.Window}},
 				fn: (column, tables=<-) =>
 					tables |> sum(column: "_value"),
 				createEmpty: true
 			)`,
+	); err != nil {
+		panic(err)
+	} else if err := tmpl.Execute(&buf, struct {
+		Bucket      string
+		Start       string
+		Measurement string
+		Window      string
+	}{
+		"hello",
+		"-1h",
+		"chat",
+		"1m",
+	}); err != nil {
+		panic(err)
+	}
+
+	res, err := qapi.Query(
+		context.Background(),
+		buf.String(),
 	)
 	if err != nil {
 		panic(err)
