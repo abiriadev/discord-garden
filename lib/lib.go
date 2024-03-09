@@ -2,6 +2,8 @@ package lib
 
 import (
 	"context"
+	"strings"
+	"text/template"
 	"time"
 
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
@@ -25,8 +27,9 @@ type RankRecord struct {
 }
 
 func Rank(qapi api.QueryAPI) []RankRecord {
-	res, err := qapi.Query(
-		context.Background(),
+	var buf *strings.Builder
+
+	if tmpl, err := template.New("rank").Parse(
 		`from(bucket: "hello")
 			|> range(start: 0)
 			|> filter(fn: (r) => r["_measurement"] == "chat")
@@ -34,7 +37,16 @@ func Rank(qapi api.QueryAPI) []RankRecord {
 			|> sum(column: "_value")
 			|> group()
 			|> sort(columns: ["_value"], desc: true)
-			|> limit(n: 10)`,
+			|> limit(n: {{.Limit}})`,
+	); err != nil {
+		panic(err)
+	} else if err := tmpl.Execute(buf, struct{ Limit int }{10}); err != nil {
+		panic(err)
+	}
+
+	res, err := qapi.Query(
+		context.Background(),
+		buf.String(),
 	)
 	if err != nil {
 		panic(err)
