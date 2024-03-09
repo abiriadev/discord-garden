@@ -25,16 +25,25 @@ type RankRecord struct {
 }
 
 func Rank(qapi api.QueryAPI) []RankRecord {
-	res, err := qapi.Query(
+	res, err := qapi.QueryWithParams(
 		context.Background(),
-		`from(bucket: "hello")
-			|> range(start: -6d)
-			|> filter(fn: (r) => r["_measurement"] == "chat")
+		`from(bucket: params.bucket)
+			|> range(start: 0)
+			|> filter(fn: (r) => r["_measurement"] == params.measurement)
 			|> group(columns: ["id"])
 			|> count()
 			|> group()
 			|> sort(columns: ["_value"], desc: true)
-			|> limit(n: 10)`,
+			|> limit(n: params.limit)`,
+		struct {
+			Bucket      string `json:"start"`
+			Measurement string `json:"measurement"`
+			Limit       int    `json:"limit"`
+		}{
+			Bucket:      "hello",
+			Measurement: "chat",
+			Limit:       10,
+		},
 	)
 	if err != nil {
 		panic(err)
