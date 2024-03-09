@@ -27,7 +27,7 @@ type RankRecord struct {
 }
 
 func Rank(qapi api.QueryAPI) []RankRecord {
-	var buf *strings.Builder
+	var buf strings.Builder
 
 	if tmpl, err := template.New("rank").Parse(
 		`from(bucket: "hello")
@@ -40,7 +40,7 @@ func Rank(qapi api.QueryAPI) []RankRecord {
 			|> limit(n: {{.Limit}})`,
 	); err != nil {
 		panic(err)
-	} else if err := tmpl.Execute(buf, struct{ Limit int }{10}); err != nil {
+	} else if err := tmpl.Execute(&buf, struct{ Limit int }{10}); err != nil {
 		panic(err)
 	}
 
