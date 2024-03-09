@@ -2,7 +2,6 @@ package lib
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
@@ -66,7 +65,7 @@ func Rank(qapi api.QueryAPI) []RankRecord {
 	return rankMap
 }
 
-func Garden(qapi api.QueryAPI) {
+func Garden(qapi api.QueryAPI) []int {
 	res, err := qapi.Query(context.Background(),
 		`from(bucket: "hello")
 			|> range(start: -1h)
@@ -82,18 +81,15 @@ func Garden(qapi api.QueryAPI) {
 		panic(err)
 	}
 
-	for res.Next() {
-		if res.TableChanged() {
-			fmt.Printf("table: %s\n", res.TableMetadata().String())
-		}
+	gardenMap := []int{}
 
-		// switch v := res.Record().ValueByKey("id").(type) {
-		fmt.Printf("value: %v\n", res.Record().Value())
-		// rankMap = append(rankMap, RankRecord{
-		// 	Id:    id,
-		// 	Point: int(res.Record().Value().(int64)),
-		// })
+	for res.Next() {
+		v, _ := res.Record().Value().(int64)
+
+		gardenMap = append(gardenMap, int(v))
 	}
+
+	return gardenMap
 }
 
 func InitClient(
