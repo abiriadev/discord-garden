@@ -63,12 +63,8 @@ func Rank(qapi api.QueryAPI) []RankRecord {
 	rankMap := []RankRecord{}
 
 	for res.Next() {
-		var id string
-
-		switch v := res.Record().ValueByKey("id").(type) {
-		case string:
-			id = v
-		case nil:
+		id, ok := res.Record().ValueByKey("id").(string)
+		if !ok {
 			id = "anon"
 		}
 
