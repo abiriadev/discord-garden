@@ -158,16 +158,6 @@ func msg(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	if m.Content == "ping" {
-		// log.Println(m.Content)
-		s.ChannelMessageSend(m.ChannelID, "Pong!")
-	}
-
 	lib.Record(wapi, m.Author.ID, 1, m.Timestamp)
 	log.Printf("save msg @%s: %s\n", m.Author.Username, m.Content)
-
-	// if m.Message.Content == "!garden" {
-	// }
-
-	// }
 }
