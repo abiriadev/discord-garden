@@ -29,15 +29,8 @@ type RankRecord struct {
 func Rank(qapi api.QueryAPI) []RankRecord {
 	var buf strings.Builder
 
-	if tmpl, err := template.New("rank").Parse(
-		`from(bucket: "{{.Bucket}}")
-			|> range(start: 0)
-			|> filter(fn: (r) => r["_measurement"] == "{{.Measurement}}")
-			|> group(columns: ["id"])
-			|> sum(column: "_value")
-			|> group()
-			|> sort(columns: ["_value"], desc: true)
-			|> limit(n: {{.Limit}})`,
+	if tmpl, err := template.New("rank").ParseFiles(
+		"./queries/rank.flux.tmpl",
 	); err != nil {
 		panic(err)
 	} else if err := tmpl.Execute(&buf, struct {
@@ -84,16 +77,8 @@ func Rank(qapi api.QueryAPI) []RankRecord {
 func Garden(qapi api.QueryAPI) []int {
 	var buf strings.Builder
 
-	if tmpl, err := template.New("garden").Parse(
-		`from(bucket: "{{.Bucket}}")
-			|> range(start: {{.Start}})
-			|> filter(fn: (r) => r["_measurement"] == "{{.Measurement}}" and r.id == "{{.Id}}")
-			|> aggregateWindow(
-				every: {{.Window}},
-				fn: (column, tables=<-) =>
-					tables |> sum(column: "_value"),
-				createEmpty: true
-			)`,
+	if tmpl, err := template.New("garden").ParseFiles(
+		"./queries/garden.flux.tmpl,
 	); err != nil {
 		panic(err)
 	} else if err := tmpl.Execute(&buf, struct {
