@@ -6,6 +6,24 @@ var commands = []*discordgo.ApplicationCommand{
 	{
 		Name:        "ranking",
 		Description: "Server ranking",
+		Options: []*discordgo.ApplicationCommandOption{
+
+			{
+				Type:        discordgo.ApplicationCommandOptionString,
+				Name:        "range",
+				Description: "Range of the ranking",
+				Choices: []*discordgo.ApplicationCommandOptionChoice{
+					{
+						Name:  "weekly",
+						Value: "weekly",
+					},
+					{
+						Name:  "monthly",
+						Value: "monthly",
+					},
+				},
+			},
+		},
 	},
 	{
 		Name:        "garden",

@@ -5,10 +5,10 @@ import (
 	"os"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/grafana/xk6-browser/env"
 )
 
-var tok = os.Getenv("DISCORD_TOKEN").
+var tok = os.Getenv("DISCORD_TOKEN")
+var gid = os.Getenv("GID")
 
 func main() {
 	discord, err := discordgo.New("Bot " + tok)
@@ -18,14 +18,12 @@ func main() {
 
 	log.Println("Updating slash commands")
 
-	registeredCommands := make([]*discordgo.ApplicationCommand, len(commands))
-	for i, v := range commands {
+	for _, v := range commands {
 		cmd, err := discord.ApplicationCommandCreate(discord.State.User.ID, gid, v)
 		if err != nil {
 			log.Panicf("Cannot create '%v' command: %v", v.Name, err)
 		} else {
 			log.Printf("added: %v", v.Name)
 		}
-		registeredCommands[i] = cmd
 	}
 }
