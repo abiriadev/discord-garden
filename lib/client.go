@@ -58,31 +58,23 @@ type RankRecord struct {
 }
 
 func (c *InfluxClient) Rank(rng string) []RankRecord {
-	var buf strings.Builder
-	var tmplName, tmplPath, rQ string
+	var tmplPath, rQ string
 
 	switch rng {
 	case "weekly":
-		tmplName = "rank.boundary.flux"
 		tmplPath = "./lib/queries/rank.boundary.flux"
 		rQ = "boundaries.week()"
 	case "monthly":
-		tmplName = "rank.boundary.flux"
 		tmplPath = "./lib/queries/rank.boundary.flux"
 		rQ = "boundaries.month()"
 	case "all":
-		tmplName = "rank.flux"
 		tmplPath = "./lib/queries/rank.flux"
 		rQ = "0"
 	default:
 		panic("unknown range")
 	}
 
-	if tmpl, err := template.New(tmplName).ParseFiles(
-		tmplPath,
-	); err != nil {
-		panic(err)
-	} else if err := tmpl.Execute(&buf, struct {
+	query, err := useTemplate(tmplPath, struct {
 		Bucket      string
 		Range       string
 		Measurement string
@@ -92,13 +84,14 @@ func (c *InfluxClient) Rank(rng string) []RankRecord {
 		rQ,
 		c.measurement,
 		10,
-	}); err != nil {
+	})
+	if err != nil {
 		panic(err)
 	}
 
 	res, err := c.qapi.Query(
 		context.Background(),
-		buf.String(),
+		query,
 	)
 	if err != nil {
 		panic(err)
