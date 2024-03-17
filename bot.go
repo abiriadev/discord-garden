@@ -66,10 +66,7 @@ func main() {
 	s.AddHandler(
 		map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 			"ranking": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-				optMap := make(map[string]string)
-				for _, v := range i.ApplicationCommandData().Options {
-					optMap[v.Name] = v.StringValue()
-				}
+				optMap := optMap(i)
 
 				rng, ok := optMap["range"]
 				if !ok {
