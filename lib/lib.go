@@ -57,7 +57,7 @@ type RankRecord struct {
 	Point int
 }
 
-func (c InfluxClient) Rank(rng string) []RankRecord {
+func (c *InfluxClient) Rank(rng string) []RankRecord {
 	var buf strings.Builder
 	var tmplName, tmplPath, rQ string
 
