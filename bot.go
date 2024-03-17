@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"log"
 	"os"
@@ -88,29 +87,21 @@ func main() {
 				}
 			},
 			"garden": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-				res := lib.Garden(qapi)
-				var buf bytes.Buffer
-
-				fmt.Println(res)
-
-				for i := 0; i < 5; i++ {
-					for j := 0; j < 6; j++ {
-						buf.WriteString(fmt.Sprintf("%d ", res[i*6+j]))
-					}
-					buf.WriteString("\n")
-				}
-
-				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-					Type: discordgo.InteractionResponseChannelMessageWithSource,
-					Data: &discordgo.InteractionResponseData{
-						Embeds: []*discordgo.MessageEmbed{
-							&discordgo.MessageEmbed{
-								Title:       "Garden",
-								Description: buf.String(),
+				if res, err := influxclient.Garden(i.User.ID); err != nil {
+					s.InteractionRespond(i.Interaction, makeErrorResponse(err))
+				} else {
+					s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+						Type: discordgo.InteractionResponseChannelMessageWithSource,
+						Data: &discordgo.InteractionResponseData{
+							Embeds: []*discordgo.MessageEmbed{
+								&discordgo.MessageEmbed{
+									Title:       "Garden",
+									Description: buf.String(),
+								},
 							},
 						},
-					},
-				})
+					})
+				}
 			},
 		},
 	)
