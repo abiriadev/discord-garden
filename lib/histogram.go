@@ -32,6 +32,6 @@ func (_ BinaryMeanHistogram) Process(data []int, height int) func(int) int {
 			return v
 		}
 		i, _ := slices.BinarySearch(tmp, v)
-		return i * height / l
+		return i*height/l + 1
 	}
 }
