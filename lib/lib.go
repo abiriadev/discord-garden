@@ -125,7 +125,7 @@ func (c *InfluxClient) Rank(rng string) []RankRecord {
 	return rankMap
 }
 
-func Garden(qapi api.QueryAPI) []int {
+func (c *InfluxClient) Garden() []int {
 	var buf strings.Builder
 
 	if tmpl, err := template.New("garden.flux").ParseFiles(
@@ -139,16 +139,16 @@ func Garden(qapi api.QueryAPI) []int {
 		Id          string
 		Window      string
 	}{
-		"hello",
+		c.bucket,
 		"-30d",
-		"chat",
+		c.measurement,
 		"662201438621138954",
 		"1d",
 	}); err != nil {
 		panic(err)
 	}
 
-	res, err := qapi.Query(
+	res, err := c.qapi.Query(
 		context.Background(),
 		buf.String(),
 	)
