@@ -17,19 +17,17 @@ import (
 var host = os.Getenv("INFLUX_HOST")
 var qapi, wapi = lib.InitClient(host, os.Getenv("INFLUX"), "cl", "hello")
 
-var gid = os.Getenv("GID")
-
 func main() {
 	tok := os.Getenv("TOK")
 
-	discord, err := discordgo.New("Bot " + tok)
+	s, err := discordgo.New("Bot " + tok)
 	if err != nil {
 		panic(err)
 	}
 
-	discord.AddHandler(msg)
+	s.AddHandler(msg)
 
-	discord.Identify.Intents = discordgo.IntentsGuildMessages
+	s.Identify.Intents = discordgo.IntentsGuildMessages
 
 	commandHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 		"query": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -51,7 +49,28 @@ func main() {
 			})
 		},
 		"ranking": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			rank := lib.Rank(qapi)
+			optMap := make(map[string]string)
+			for _, v := range i.ApplicationCommandData().Options {
+				optMap[v.Name] = v.StringValue()
+			}
+
+			rng, ok := optMap["range"]
+			var rngText string
+			if !ok {
+				rng = "all"
+				rngText = "Total Ranking"
+			} else {
+				switch rng {
+				case "weekly":
+					rngText = "Weekly Ranking"
+					break
+				case "monthly":
+					rngText = "Monthly Ranking"
+					break
+				}
+			}
+
+			rank := lib.Rank(qapi, rng)
 
 			var buf bytes.Buffer
 
@@ -66,7 +85,7 @@ func main() {
 				Data: &discordgo.InteractionResponseData{
 					Embeds: []*discordgo.MessageEmbed{
 						&discordgo.MessageEmbed{
-							Title:       "Ranking",
+							Title:       rngText,
 							Description: buf.String(),
 							Color:       0x39d353,
 						},
@@ -78,9 +97,11 @@ func main() {
 			res := lib.Garden(qapi)
 			var buf bytes.Buffer
 
+			fmt.Println(res)
+
 			for i := 0; i < 5; i++ {
 				for j := 0; j < 6; j++ {
-					buf.WriteString(fmt.Sprintf("%d ", res[i*5+j]))
+					buf.WriteString(fmt.Sprintf("%d ", res[i*6+j]))
 				}
 				buf.WriteString("\n")
 			}
@@ -99,18 +120,18 @@ func main() {
 		},
 	}
 
-	discord.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		if h, ok := commandHandlers[i.ApplicationCommandData().Name]; ok {
 			h(s, i)
 		}
 	})
 
-	discord.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
+	s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
 		log.Printf("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)
 	})
 
-	defer discord.Close()
-	if err := discord.Open(); err != nil {
+	defer s.Close()
+	if err := s.Open(); err != nil {
 		panic(err)
 	}
 
