@@ -133,7 +133,7 @@ func (c *InfluxClient) Rank(rng string) ([]RankRecord, error) {
 	}), nil
 }
 
-func (c *InfluxClient) Garden() []int {
+func (c *InfluxClient) Garden(id string) []int {
 	query, err := useTemplate("./lib/queries/garden.flux", struct {
 		Bucket      string
 		Start       string
@@ -144,7 +144,7 @@ func (c *InfluxClient) Garden() []int {
 		c.bucket,
 		"-30d",
 		c.measurement,
-		"662201438621138954",
+		id,
 		"1d",
 	})
 	if err != nil {
