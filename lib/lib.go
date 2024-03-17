@@ -26,19 +26,39 @@ type RankRecord struct {
 	Point int
 }
 
-func Rank(qapi api.QueryAPI) []RankRecord {
+func Rank(qapi api.QueryAPI, rng string) []RankRecord {
 	var buf strings.Builder
+	var tmplName, tmplPath, rQ string
 
-	if tmpl, err := template.New("rank").ParseFiles(
-		"./lib/queries/rank.flux",
+	switch rng {
+	case "weekly":
+		tmplName = "rank.boundary.flux"
+		tmplPath = "./lib/queries/rank.boundary.flux"
+		rQ = "boundaries.week()"
+	case "monthly":
+		tmplName = "rank.boundary.flux"
+		tmplPath = "./lib/queries/rank.boundary.flux"
+		rQ = "boundaries.month()"
+	case "all":
+		tmplName = "rank.flux"
+		tmplPath = "./lib/queries/rank.flux"
+		rQ = "0"
+	default:
+		panic("unknown range")
+	}
+
+	if tmpl, err := template.New(tmplName).ParseFiles(
+		tmplPath,
 	); err != nil {
 		panic(err)
 	} else if err := tmpl.Execute(&buf, struct {
 		Bucket      string
+		Range       string
 		Measurement string
 		Limit       int
 	}{
 		"hello",
+		rQ,
 		"chat",
 		10,
 	}); err != nil {
