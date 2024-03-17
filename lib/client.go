@@ -2,13 +2,11 @@ package lib
 
 import (
 	"context"
-	"strings"
-	"text/template"
 	"time"
 
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/influxdata/influxdb-client-go/v2/api"
-	"github.com/influxdata/influxdb-client-go/v2/api/query"
+	influxquery "github.com/influxdata/influxdb-client-go/v2/api/query"
 	"github.com/samber/lo"
 )
 
@@ -43,9 +41,7 @@ func NewInfluxClient(
 	}
 }
 
-type Fr = *query.FluxRecord
-
-func (c *InfluxClient) queryInner(query string) ([][]*query.FluxRecord, error) {
+func (c *InfluxClient) queryInner(query string) ([][]*influxquery.FluxRecord, error) {
 	tables := make([][]Fr, 0)
 
 	res, err := c.qapi.Query(
@@ -147,13 +143,7 @@ func (c *InfluxClient) Rank(rng string) []RankRecord {
 }
 
 func (c *InfluxClient) Garden() []int {
-	var buf strings.Builder
-
-	if tmpl, err := template.New("garden.flux").ParseFiles(
-		"./lib/queries/garden.flux",
-	); err != nil {
-		panic(err)
-	} else if err := tmpl.Execute(&buf, struct {
+	query, err := useTemplate("./lib/queries/garden.flux", struct {
 		Bucket      string
 		Start       string
 		Measurement string
@@ -165,11 +155,12 @@ func (c *InfluxClient) Garden() []int {
 		c.measurement,
 		"662201438621138954",
 		"1d",
-	}); err != nil {
+	})
+	if err != nil {
 		panic(err)
 	}
 
-	res, err := c.queryInner(buf.String())
+	res, err := c.queryInner(query)
 	if err != nil {
 		panic(err)
 	}
@@ -177,7 +168,7 @@ func (c *InfluxClient) Garden() []int {
 		panic("unexpected number of tables")
 	}
 
-	return lo.Map(res[0], func(r *query.FluxRecord, _ int) int {
+	return lo.Map(res[0], func(r *influxquery.FluxRecord, _ int) int {
 		return int(r.Value().(int64))
 	})
 }
