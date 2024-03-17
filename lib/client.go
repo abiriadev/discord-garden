@@ -166,18 +166,21 @@ func (c *InfluxClient) Garden() []int {
 		panic(err)
 	}
 
-	res, err := c.qapi.Query(
-		context.Background(),
-		buf.String(),
-	)
+	gardenMap := []int{}
+
+	res, err := c.queryInner(buf.String())
 	if err != nil {
 		panic(err)
 	}
+	if len(res) != 1 {
+		panic("unexpected number of tables")
+	}
 
-	gardenMap := []int{}
-
-	for res.Next() {
-		v, _ := res.Record().Value().(int64)
+	for _, v := range res[0] {
+		v, ok := v.Value().(int64)
+		if !ok {
+			panic("type assertion failed")
+		}
 
 		gardenMap = append(gardenMap, int(v))
 	}
