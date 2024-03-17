@@ -89,15 +89,22 @@ func main() {
 			}
 		},
 		"garden": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			fmt.Println(i.Member.User.ID)
-			if res, err := influxclient.Garden(i.Member.User.ID); err != nil {
+			optMap := optMap(i)
+			var targetUser *discordgo.User
+			if user, ok := optMap["user"]; ok {
+				targetUser = user.UserValue(nil)
+			} else {
+				targetUser = i.Member.User
+			}
+
+			if res, err := influxclient.Garden(targetUser.ID); err != nil {
 				s.InteractionRespond(i.Interaction, makeErrorResponse(err))
 			} else {
 				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: &discordgo.InteractionResponseData{
 						Embeds: []*discordgo.MessageEmbed{
-							embedifyGarden(res, i.Member.User.Username),
+							embedifyGarden(res, targetUser.Username),
 						},
 					},
 				})
