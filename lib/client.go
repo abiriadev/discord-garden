@@ -42,7 +42,7 @@ func NewInfluxClient(
 }
 
 func (c *InfluxClient) queryInner(query string) ([][]*influxquery.FluxRecord, error) {
-	tables := make([][]Fr, 0)
+	tables := make([][]*influxquery.FluxRecord, 0)
 
 	res, err := c.qapi.Query(
 		context.Background(),
@@ -54,7 +54,7 @@ func (c *InfluxClient) queryInner(query string) ([][]*influxquery.FluxRecord, er
 
 	for res.Next() {
 		if res.TableChanged() {
-			tables = append(tables, make([]Fr, 0))
+			tables = append(tables, make([]*influxquery.FluxRecord, 0))
 		}
 		tables[len(tables)-1] = append(tables[len(tables)-1], res.Record())
 	}
@@ -113,33 +113,25 @@ func (c *InfluxClient) Rank(rng string) []RankRecord {
 		panic(err)
 	}
 
-	res, err := c.qapi.Query(
-		context.Background(),
-		query,
-	)
+	res, err := c.queryInner(query)
 	if err != nil {
 		panic(err)
 	}
+	if len(res) != 1 {
+		panic("unexpected number of tables")
+	}
 
-	rankMap := []RankRecord{}
-
-	for res.Next() {
-		id, ok := res.Record().ValueByKey("id").(string)
+	return lo.Map(res[0], func(r *influxquery.FluxRecord, _ int) RankRecord {
+		id, ok := r.ValueByKey("id").(string)
 		if !ok {
 			id = "anon"
 		}
 
-		rankMap = append(rankMap, RankRecord{
+		return RankRecord{
 			Id:    id,
-			Point: int(res.Record().Value().(int64)),
-		})
-	}
-
-	if res.Err() != nil {
-		panic(res.Err())
-	}
-
-	return rankMap
+			Point: int(r.Value().(int64)),
+		}
+	})
 }
 
 func (c *InfluxClient) Garden() []int {
