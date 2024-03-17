@@ -4,10 +4,13 @@ import "github.com/bwmarrin/discordgo"
 
 var commands = []*discordgo.ApplicationCommand{
 	{
+		Name:        "status",
+		Description: "Show bot status",
+	},
+	{
 		Name:        "ranking",
 		Description: "Server ranking",
 		Options: []*discordgo.ApplicationCommandOption{
-
 			{
 				Type:        discordgo.ApplicationCommandOptionString,
 				Name:        "range",
@@ -28,9 +31,12 @@ var commands = []*discordgo.ApplicationCommand{
 	{
 		Name:        "garden",
 		Description: "Show my grass garden",
-	},
-	{
-		Name:        "query",
-		Description: "Random query",
+		Options: []*discordgo.ApplicationCommandOption{
+			{
+				Type:        discordgo.ApplicationCommandOptionUser,
+				Name:        "user",
+				Description: "User to show garden",
+			},
+		},
 	},
 }
