@@ -149,3 +149,7 @@ func InitClient(
 
 	return client.QueryAPI(org), client.WriteAPIBlocking(org, bucket)
 }
+
+type Histogram interface {
+	Process(data []int, height int) func(int) int
+}
