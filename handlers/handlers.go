@@ -1,5 +1,5 @@
-import "github.com/bwmarrin/discordgo"
+package handlers
 
-var Handlers = []func(s *discordgo.Session, _ any){
-	ready,
+var Handlers = []any{
+	Ready,
 }
