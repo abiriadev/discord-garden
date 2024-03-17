@@ -166,7 +166,3 @@ func (c *InfluxClient) Garden() []int {
 
 	return gardenMap
 }
-
-type Histogram interface {
-	Process(data []int, height int) func(int) int
-}
