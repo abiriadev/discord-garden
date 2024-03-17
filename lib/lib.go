@@ -97,7 +97,7 @@ func Rank(qapi api.QueryAPI, rng string) []RankRecord {
 func Garden(qapi api.QueryAPI) []int {
 	var buf strings.Builder
 
-	if tmpl, err := template.New("garden").ParseFiles(
+	if tmpl, err := template.New("garden.flux").ParseFiles(
 		"./lib/queries/garden.flux",
 	); err != nil {
 		panic(err)
@@ -109,10 +109,10 @@ func Garden(qapi api.QueryAPI) []int {
 		Window      string
 	}{
 		"hello",
-		"-1h",
+		"-30d",
 		"chat",
 		"662201438621138954",
-		"1m",
+		"1d",
 	}); err != nil {
 		panic(err)
 	}
