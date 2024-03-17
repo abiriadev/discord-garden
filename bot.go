@@ -62,49 +62,50 @@ func main() {
 		log.Printf("save msg @%s: %s\n", m.Author.Username, m.Content)
 	})
 
-	s.AddHandler(
-		map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-			"ranking": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-				optMap := optMap(i)
+	commandHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
+		"ranking": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			optMap := optMap(i)
 
-				rng, ok := optMap["range"]
-				if !ok {
-					rng = "all"
-				}
+			rng, ok := optMap["range"]
+			if !ok {
+				rng = "all"
+			}
 
-				if rank, err := influxclient.Rank(rng); err != nil {
-					s.InteractionRespond(i.Interaction, makeErrorResponse(err))
-				} else {
-					s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-						Type: discordgo.InteractionResponseChannelMessageWithSource,
-						Data: &discordgo.InteractionResponseData{
-							Title: "title",
-							Embeds: []*discordgo.MessageEmbed{
-								embedifyRank(rank, rng),
-							},
+			if rank, err := influxclient.Rank(rng); err != nil {
+				s.InteractionRespond(i.Interaction, makeErrorResponse(err))
+			} else {
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Title: "title",
+						Embeds: []*discordgo.MessageEmbed{
+							embedifyRank(rank, rng),
 						},
-					})
-				}
-			},
-			"garden": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-				if res, err := influxclient.Garden(i.User.ID); err != nil {
-					s.InteractionRespond(i.Interaction, makeErrorResponse(err))
-				} else {
-					s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-						Type: discordgo.InteractionResponseChannelMessageWithSource,
-						Data: &discordgo.InteractionResponseData{
-							Embeds: []*discordgo.MessageEmbed{
-								&discordgo.MessageEmbed{
-									Title:       "Garden",
-									Description: buf.String(),
-								},
-							},
-						},
-					})
-				}
-			},
+					},
+				})
+			}
 		},
-	)
+		"garden": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			if res, err := influxclient.Garden(i.User.ID); err != nil {
+				s.InteractionRespond(i.Interaction, makeErrorResponse(err))
+			} else {
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Embeds: []*discordgo.MessageEmbed{
+							embedifyGarden(res),
+						},
+					},
+				})
+			}
+		},
+	}
+
+	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		if h, ok := commandHandlers[i.ApplicationCommandData().Name]; ok {
+			h(s, i)
+		}
+	})
 
 	defer s.Close()
 	if err := s.Open(); err != nil {
