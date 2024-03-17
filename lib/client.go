@@ -62,6 +62,8 @@ func (c *InfluxClient) queryInner(query string) ([][]query.FluxRecord, error) {
 	if res.Err() != nil {
 		return tables, res.Err()
 	}
+
+	return tables, nil
 }
 
 func (c *InfluxClient) Record(id string, point int, when time.Time) {
