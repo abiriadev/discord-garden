@@ -160,6 +160,10 @@ func (c *InfluxClient) Garden(id string) ([]int, error) {
 	}
 
 	return lo.Map(res[0], func(r *influxquery.FluxRecord, _ int) int {
-		return int(r.Value().(int64))
+		if v, ok := r.Value().(int64); ok {
+			return 0
+		} else {
+			return int(v)
+		}
 	}), nil
 }
