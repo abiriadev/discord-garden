@@ -17,13 +17,13 @@ type InfluxClient struct {
 	measurement string
 }
 
-func Record(wapi api.WriteAPIBlocking, id string, point int, when time.Time) {
-	p := influxdb2.NewPointWithMeasurement("chat").
+func (c *InfluxClient) Record(id string, point int, when time.Time) {
+	p := influxdb2.NewPointWithMeasurement(c.measurement).
 		AddTag("id", id).
 		AddField("point", point).
 		SetTime(when)
 
-	if err := wapi.WritePoint(context.Background(), p); err != nil {
+	if err := c.wapi.WritePoint(context.Background(), p); err != nil {
 		panic(err)
 	}
 }
