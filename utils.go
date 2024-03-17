@@ -10,6 +10,7 @@ import (
 )
 
 var primaryColor = 0x39d353
+var errorColor = 0xD35039
 
 var numberEmojiList = []string{
 	"one",
@@ -22,6 +23,37 @@ var numberEmojiList = []string{
 	"eight",
 	"nine",
 	"keycap_ten",
+}
+
+func optMap(i *discordgo.InteractionCreate) map[string]string {
+	optMap := make(map[string]string)
+	for _, v := range i.ApplicationCommandData().Options {
+		optMap[v.Name] = v.StringValue()
+	}
+	return optMap
+}
+
+func makeErrorResponse(err error) *discordgo.InteractionResponse {
+	return &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Title: "title",
+			Embeds: []*discordgo.MessageEmbed{
+				&discordgo.MessageEmbed{
+					Title:       "Error",
+					Description: fmt.Sprintf("```golang\n%s\n```", err.Error()),
+					Color:       errorColor,
+				},
+			},
+			Components: []discordgo.MessageComponent{
+				discordgo.Button{
+					Label: "Open new issue on repository",
+					Style: discordgo.DangerButton,
+					URL:   "https://github.com/abiriadev/discord-garden/issues/new",
+				},
+			},
+		},
+	}
 }
 
 func embedifyRank(data []lib.RankRecord, rng string) *discordgo.MessageEmbed {

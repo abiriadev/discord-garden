@@ -73,17 +73,19 @@ func main() {
 					rng = "all"
 				}
 
-				rank, err := influxclient.Rank(rng)
-
-				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-					Type: discordgo.InteractionResponseChannelMessageWithSource,
-					Data: &discordgo.InteractionResponseData{
-						Title: "title",
-						Embeds: []*discordgo.MessageEmbed{
-							embedifyRank(rank, rng),
+				if rank, err := influxclient.Rank(rng); err != nil {
+					s.InteractionRespond(i.Interaction, makeErrorResponse(err))
+				} else {
+					s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+						Type: discordgo.InteractionResponseChannelMessageWithSource,
+						Data: &discordgo.InteractionResponseData{
+							Title: "title",
+							Embeds: []*discordgo.MessageEmbed{
+								embedifyRank(rank, rng),
+							},
 						},
-					},
-				})
+					})
+				}
 			},
 			"garden": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 				res := lib.Garden(qapi)
