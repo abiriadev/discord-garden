@@ -30,7 +30,7 @@ func Rank(qapi api.QueryAPI) []RankRecord {
 	var buf strings.Builder
 
 	if tmpl, err := template.New("rank").ParseFiles(
-		"./queries/rank.flux.tmpl",
+		"./queries/rank.flux",
 	); err != nil {
 		panic(err)
 	} else if err := tmpl.Execute(&buf, struct {
@@ -78,7 +78,7 @@ func Garden(qapi api.QueryAPI) []int {
 	var buf strings.Builder
 
 	if tmpl, err := template.New("garden").ParseFiles(
-		"./queries/garden.flux.tmpl,
+		"./queries/garden.flux"
 	); err != nil {
 		panic(err)
 	} else if err := tmpl.Execute(&buf, struct {
