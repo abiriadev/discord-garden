@@ -57,7 +57,7 @@ type RankRecord struct {
 	Point int
 }
 
-func Rank(qapi api.QueryAPI, rng string) []RankRecord {
+func (c InfluxClient) Rank(rng string) []RankRecord {
 	var buf strings.Builder
 	var tmplName, tmplPath, rQ string
 
@@ -88,15 +88,15 @@ func Rank(qapi api.QueryAPI, rng string) []RankRecord {
 		Measurement string
 		Limit       int
 	}{
-		"hello",
+		c.bucket,
 		rQ,
-		"chat",
+		c.measurement,
 		10,
 	}); err != nil {
 		panic(err)
 	}
 
-	res, err := qapi.Query(
+	res, err := c.qapi.Query(
 		context.Background(),
 		buf.String(),
 	)
