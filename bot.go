@@ -93,7 +93,7 @@ func main() {
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: &discordgo.InteractionResponseData{
 						Embeds: []*discordgo.MessageEmbed{
-							embedifyGarden(res),
+							embedifyGarden(res, config.DiscordGuildId),
 						},
 					},
 				})
