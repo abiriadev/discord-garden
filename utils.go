@@ -25,6 +25,14 @@ var numberEmojiList = []string{
 	"keycap_ten",
 }
 
+var grassEmojiList = []string{
+	"grass0",
+	"grass1",
+	"grass2",
+	"grass3",
+	"grass4",
+}
+
 func optMap(i *discordgo.InteractionCreate) map[string]string {
 	optMap := make(map[string]string)
 	for _, v := range i.ApplicationCommandData().Options {
@@ -70,6 +78,22 @@ func embedifyRank(data []lib.RankRecord, rng string) *discordgo.MessageEmbed {
 		Case("weekly", "Weekly Ranking").
 		Case("monthly", "Monthly Ranking").
 		Default("Ranking")
+
+	return &discordgo.MessageEmbed{
+		Title:       rngText,
+		Description: buf.String(),
+		Color:       primaryColor,
+	}
+}
+
+func embedifyGarden(data []int) *discordgo.MessageEmbed {
+	var buf strings.Builder
+
+	for i, r := range data {
+		buf.WriteString(
+			fmt.Sprintf(":%s: <@%s>: %d\n", numberEmojiList[i], r.Id, r.Point),
+		)
+	}
 
 	return &discordgo.MessageEmbed{
 		Title:       rngText,
