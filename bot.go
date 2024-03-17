@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -61,6 +63,100 @@ func main() {
 		influxclient.Record(m.Author.ID, 1, m.Timestamp)
 		log.Printf("save msg @%s: %s\n", m.Author.Username, m.Content)
 	})
+
+	s.AddHandler(
+
+		map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
+			"query": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+				var re string
+
+				if res, err := qapi.QueryRaw(context.Background(), "", influxdb2.DefaultDialect()); err != nil {
+					re = fmt.Sprintf("error:\n```%s```", err.Error())
+				} else {
+					// if _, err := s.ChannelMessageSend(m.ChannelID, ); err != nil
+					// s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("failed to send message:\n```%s```", err.Error()))
+					re = fmt.Sprintf("res:\n```%s```", res)
+				}
+
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: re,
+					},
+				})
+			},
+			"ranking": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+				optMap := make(map[string]string)
+				for _, v := range i.ApplicationCommandData().Options {
+					optMap[v.Name] = v.StringValue()
+				}
+
+				rng, ok := optMap["range"]
+				var rngText string
+				if !ok {
+					rng = "all"
+					rngText = "Total Ranking"
+				} else {
+					switch rng {
+					case "weekly":
+						rngText = "Weekly Ranking"
+						break
+					case "monthly":
+						rngText = "Monthly Ranking"
+						break
+					}
+				}
+
+				rank := lib.Rank(qapi, rng)
+
+				var buf bytes.Buffer
+
+				var a = []string{"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "keycap_ten"}
+
+				for i, r := range rank {
+					buf.WriteString(fmt.Sprintf(":%s: <@%s>: %d\n", a[i], r.Id, r.Point))
+				}
+
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Embeds: []*discordgo.MessageEmbed{
+							&discordgo.MessageEmbed{
+								Title:       rngText,
+								Description: buf.String(),
+								Color:       0x39d353,
+							},
+						},
+					},
+				})
+			},
+			"garden": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+				res := lib.Garden(qapi)
+				var buf bytes.Buffer
+
+				fmt.Println(res)
+
+				for i := 0; i < 5; i++ {
+					for j := 0; j < 6; j++ {
+						buf.WriteString(fmt.Sprintf("%d ", res[i*6+j]))
+					}
+					buf.WriteString("\n")
+				}
+
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Embeds: []*discordgo.MessageEmbed{
+							&discordgo.MessageEmbed{
+								Title:       "Garden",
+								Description: buf.String(),
+							},
+						},
+					},
+				})
+			},
+		},
+	)
 
 	defer s.Close()
 	if err := s.Open(); err != nil {
