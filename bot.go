@@ -12,12 +12,24 @@ import (
 	"github.com/abiriadev/discord-garden/lib"
 	"github.com/bwmarrin/discordgo"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
+	"github.com/mstoykov/envconfig"
 )
 
-var host = os.Getenv("INFLUX_HOST")
 var qapi, wapi = lib.InitClient(host, os.Getenv("INFLUX"), "cl", "hello")
 
+type Config struct {
+	InfluxHost       string `envconfig:"INFLUX_HOST"      required:"true"`
+	InfluxToken      string `envconfig:"INFLUX_TOKEN"     required:"true"`
+	DISCORD_GUILD_ID string `envconfig:"DISCORD_GUILD_ID" required:"true"`
+	DISCORD_TOKEN    string `envconfig:"DISCORD_TOKEN"    required:"true"`
+}
+
 func main() {
+	var config Config
+	if err := envconfig.Process("", &config); err != nil {
+		panic(err)
+	}
+
 	tok := os.Getenv("TOK")
 
 	s, err := discordgo.New("Bot " + tok)
@@ -119,12 +131,6 @@ func main() {
 			})
 		},
 	}
-
-	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		if h, ok := commandHandlers[i.ApplicationCommandData().Name]; ok {
-			h(s, i)
-		}
-	})
 
 	s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
 		log.Printf("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)
