@@ -133,7 +133,7 @@ func (c *InfluxClient) Rank(rng string) ([]RankRecord, error) {
 	}), nil
 }
 
-func (c *InfluxClient) Garden(id string) []int {
+func (c *InfluxClient) Garden(id string) ([]int, error) {
 	query, err := useTemplate("./lib/queries/garden.flux", struct {
 		Bucket      string
 		Start       string
@@ -148,18 +148,18 @@ func (c *InfluxClient) Garden(id string) []int {
 		"1d",
 	})
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	res, err := c.queryInner(query)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	if len(res) != 1 {
-		panic("unexpected number of tables")
+		return nil, err
 	}
 
 	return lo.Map(res[0], func(r *influxquery.FluxRecord, _ int) int {
 		return int(r.Value().(int64))
-	})
+	}), nil
 }
