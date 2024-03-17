@@ -14,7 +14,8 @@ import (
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 )
 
-var qapi, wapi = lib.InitClient("http://influx:8086", os.Getenv("INFLUX"), "cl", "hello")
+var host = os.Getenv("INFLUX_HOST")
+var qapi, wapi = lib.InitClient(host, os.Getenv("INFLUX"), "cl", "hello")
 
 var gid = os.Getenv("GID")
 
@@ -29,21 +30,6 @@ func main() {
 	discord.AddHandler(msg)
 
 	discord.Identify.Intents = discordgo.IntentsGuildMessages
-
-	commands := []*discordgo.ApplicationCommand{
-		{
-			Name:        "ranking",
-			Description: "Server ranking",
-		},
-		{
-			Name:        "garden",
-			Description: "Show my grass garden",
-		},
-		{
-			Name:        "query",
-			Description: "random query",
-		},
-	}
 
 	commandHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 		"query": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -82,6 +68,7 @@ func main() {
 						&discordgo.MessageEmbed{
 							Title:       "Ranking",
 							Description: buf.String(),
+							Color:       0x39d353,
 						},
 					},
 				},
@@ -127,30 +114,11 @@ func main() {
 		panic(err)
 	}
 
-	log.Println("Adding commands...")
-	registeredCommands := make([]*discordgo.ApplicationCommand, len(commands))
-	for i, v := range commands {
-		cmd, err := discord.ApplicationCommandCreate(discord.State.User.ID, gid, v)
-		if err != nil {
-			log.Panicf("Cannot create '%v' command: %v", v.Name, err)
-		} else {
-			log.Printf("added: %v", v.Name)
-		}
-		registeredCommands[i] = cmd
-	}
-
 	fmt.Println("running!")
 
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	<-sc
-
-	// for _, v := range registeredCommands {
-	// 	err := discord.ApplicationCommandDelete(discord.State.User.ID, gid, v.ID)
-	// 	if err != nil {
-	// 		log.Panicf("Cannot delete '%v' command: %v", v.Name, err)
-	// 	}
-	// }
 }
 
 func msg(s *discordgo.Session, m *discordgo.MessageCreate) {
