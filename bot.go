@@ -54,7 +54,7 @@ func main() {
 	}
 
 	s.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
-		if m.Author.ID == s.State.User.ID {
+		if m.Author.ID == s.State.User.ID || m.Author.Bot {
 			return
 		}
 
@@ -67,11 +67,14 @@ func main() {
 			optMap := optMap(i)
 
 			rng, ok := optMap["range"]
+			var rngQuery string
 			if !ok {
-				rng = "all"
+				rngQuery = "all"
+			} else {
+				rngQuery = rng.StringValue()
 			}
 
-			if rank, err := influxclient.Rank(rng); err != nil {
+			if rank, err := influxclient.Rank(rngQuery); err != nil {
 				s.InteractionRespond(i.Interaction, makeErrorResponse(err))
 			} else {
 				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -79,7 +82,7 @@ func main() {
 					Data: &discordgo.InteractionResponseData{
 						Title: "title",
 						Embeds: []*discordgo.MessageEmbed{
-							embedifyRank(rank, rng),
+							embedifyRank(rank, rngQuery),
 						},
 					},
 				})
@@ -93,10 +96,8 @@ func main() {
 				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: &discordgo.InteractionResponseData{
-						// Title:   "Title",
-						// Content: "akljfdjfka :gass1:",
 						Embeds: []*discordgo.MessageEmbed{
-							embedifyGarden(res),
+							embedifyGarden(res, i.Member.User.Username),
 						},
 					},
 				})
