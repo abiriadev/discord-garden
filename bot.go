@@ -86,7 +86,7 @@ func main() {
 			}
 		},
 		"garden": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			if res, err := influxclient.Garden(i.User.ID); err != nil {
+			if res, err := influxclient.Garden(i.Member.User.ID); err != nil {
 				s.InteractionRespond(i.Interaction, makeErrorResponse(err))
 			} else {
 				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
