@@ -9,6 +9,7 @@ import (
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/influxdata/influxdb-client-go/v2/api"
 	"github.com/influxdata/influxdb-client-go/v2/api/query"
+	"github.com/samber/lo"
 )
 
 type InfluxClient struct {
@@ -42,8 +43,10 @@ func NewInfluxClient(
 	}
 }
 
-func (c *InfluxClient) queryInner(query string) ([][]query.FluxRecord, error) {
-	tables := make([][]query.FluxRecord, 0)
+type Fr = *query.FluxRecord
+
+func (c *InfluxClient) queryInner(query string) ([][]*query.FluxRecord, error) {
+	tables := make([][]Fr, 0)
 
 	res, err := c.qapi.Query(
 		context.Background(),
@@ -55,7 +58,7 @@ func (c *InfluxClient) queryInner(query string) ([][]query.FluxRecord, error) {
 
 	for res.Next() {
 		if res.TableChanged() {
-			tables = append(tables, make([]query.FluxRecord, 0))
+			tables = append(tables, make([]Fr, 0))
 		}
 		tables[len(tables)-1] = append(tables[len(tables)-1], res.Record())
 	}
@@ -166,8 +169,6 @@ func (c *InfluxClient) Garden() []int {
 		panic(err)
 	}
 
-	gardenMap := []int{}
-
 	res, err := c.queryInner(buf.String())
 	if err != nil {
 		panic(err)
@@ -176,14 +177,7 @@ func (c *InfluxClient) Garden() []int {
 		panic("unexpected number of tables")
 	}
 
-	for _, v := range res[0] {
-		v, ok := v.Value().(int64)
-		if !ok {
-			panic("type assertion failed")
-		}
-
-		gardenMap = append(gardenMap, int(v))
-	}
-
-	return gardenMap
+	return lo.Map(res[0], func(r *query.FluxRecord, _ int) int {
+		return int(r.Value().(int64))
+	})
 }
