@@ -26,17 +26,19 @@ var numberEmojiList = []string{
 }
 
 var grassEmojiList = []string{
-	"grass0",
-	"grass1",
-	"grass2",
-	"grass3",
-	"grass4",
+	"<:grass0:1219046954798026943>",
+	"<:grass1:1219046956840652871>",
+	"<:grass2:1219046959113965688>",
+	"<:grass3:1219046961475489802>",
+	"<:grass4:1219046963366985809>",
 }
 
-func optMap(i *discordgo.InteractionCreate) map[string]string {
-	optMap := make(map[string]string)
+func optMap(
+	i *discordgo.InteractionCreate,
+) map[string]*discordgo.ApplicationCommandInteractionDataOption {
+	optMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption)
 	for _, v := range i.ApplicationCommandData().Options {
-		optMap[v.Name] = v.StringValue()
+		optMap[v.Name] = v
 	}
 	return optMap
 }
@@ -86,19 +88,26 @@ func embedifyRank(data []lib.RankRecord, rng string) *discordgo.MessageEmbed {
 	}
 }
 
-func embedifyGarden(data []int, gid string) *discordgo.MessageEmbed {
+func embedifyGarden(data []int, username string) *discordgo.MessageEmbed {
+	fmt.Println("data", data)
 	res := lib.ApplyHistogram(data, len(grassEmojiList)-1, lib.BinaryMeanHistogram{})
+	fmt.Println("res", res)
+
 	eRes := lo.Map(res, func(v, _ int) string {
 		return grassEmojiList[v]
 	})
 
 	var buf strings.Builder
-	for _, v := range eRes {
-		buf.WriteString(fmt.Sprintf("<:%s:%s> ", v, gid))
+
+	for i := 0; i < 5; i++ {
+		for j := 0; j < 6; j++ {
+			buf.WriteString(eRes[j*5+i])
+		}
+		buf.WriteString("\n")
 	}
 
 	return &discordgo.MessageEmbed{
-		Title:       "Garden",
+		Title:       fmt.Sprintf("%s's Garden", username),
 		Description: buf.String(),
 		Color:       primaryColor,
 	}
