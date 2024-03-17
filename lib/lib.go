@@ -17,6 +17,30 @@ type InfluxClient struct {
 	measurement string
 }
 
+type InfluxClientConfig struct {
+	Host        string
+	Token       string
+	Org         string
+	Bucket      string
+	Measurement string
+}
+
+func NewInfluxClient(
+	config InfluxClientConfig,
+) InfluxClient {
+	client := influxdb2.NewClient(
+		config.Host,
+		config.Token,
+	)
+
+	return InfluxClient{
+		qapi:        client.QueryAPI(config.Org),
+		wapi:        client.WriteAPIBlocking(config.Org, config.Bucket),
+		bucket:      config.Bucket,
+		measurement: config.Measurement,
+	}
+}
+
 func (c *InfluxClient) Record(id string, point int, when time.Time) {
 	p := influxdb2.NewPointWithMeasurement(c.measurement).
 		AddTag("id", id).
@@ -141,20 +165,6 @@ func Garden(qapi api.QueryAPI) []int {
 	}
 
 	return gardenMap
-}
-
-func InitClient(
-	addr string,
-	token string,
-	org string,
-	bucket string,
-) (api.QueryAPI, api.WriteAPIBlocking) {
-	client := influxdb2.NewClient(
-		addr,
-		token,
-	)
-
-	return client.QueryAPI(org), client.WriteAPIBlocking(org, bucket)
 }
 
 type Histogram interface {
