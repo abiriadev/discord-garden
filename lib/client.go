@@ -8,6 +8,7 @@ import (
 
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/influxdata/influxdb-client-go/v2/api"
+	"github.com/influxdata/influxdb-client-go/v2/api/query"
 )
 
 type InfluxClient struct {
@@ -38,6 +39,28 @@ func NewInfluxClient(
 		wapi:        client.WriteAPIBlocking(config.Org, config.Bucket),
 		bucket:      config.Bucket,
 		measurement: config.Measurement,
+	}
+}
+
+func (c *InfluxClient) queryInner(query string) ([][]query.FluxRecord, error) {
+	tables := make([][]query.FluxRecord, 0)
+
+	res, err := c.qapi.Query(
+		context.Background(),
+		query,
+	)
+	if err != nil {
+		return tables, err
+	}
+
+	for res.Next() {
+		if res.TableChanged() {
+			tables = append(tables, make([]query.FluxRecord, 0))
+		}
+		tables[len(tables)-1] = append(tables[len(tables)-1], res.Record())
+	}
+	if res.Err() != nil {
+		return tables, res.Err()
 	}
 }
 
