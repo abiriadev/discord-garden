@@ -19,7 +19,7 @@ func main() {
 	log.Println("Updating slash commands")
 
 	for _, v := range commands {
-		cmd, err := discord.ApplicationCommandCreate(discord.State.User.ID, gid, v)
+		_, err := discord.ApplicationCommandCreate(discord.State.User.ID, gid, v)
 		if err != nil {
 			log.Panicf("Cannot create '%v' command: %v", v.Name, err)
 		} else {
