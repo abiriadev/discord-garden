@@ -65,15 +65,13 @@ func (c *InfluxClient) queryInner(query string) ([][]*influxquery.FluxRecord, er
 	return tables, nil
 }
 
-func (c *InfluxClient) Record(id string, point int, when time.Time) {
+func (c *InfluxClient) Record(id string, point int, when time.Time) error {
 	p := influxdb2.NewPointWithMeasurement(c.measurement).
 		AddTag("id", id).
 		AddField("point", point).
 		SetTime(when)
 
-	if err := c.wapi.WritePoint(context.Background(), p); err != nil {
-		panic(err)
-	}
+	return c.wapi.WritePoint(context.Background(), p)
 }
 
 type RankRecord struct {
