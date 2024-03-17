@@ -10,6 +10,13 @@ import (
 	"github.com/influxdata/influxdb-client-go/v2/api"
 )
 
+type InfluxClient struct {
+	qapi        api.QueryAPI
+	wapi        api.WriteAPIBlocking
+	bucket      string
+	measurement string
+}
+
 func Record(wapi api.WriteAPIBlocking, id string, point int, when time.Time) {
 	p := influxdb2.NewPointWithMeasurement("chat").
 		AddTag("id", id).
