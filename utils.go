@@ -6,6 +6,7 @@ import (
 
 	"github.com/abiriadev/discord-garden/lib"
 	"github.com/bwmarrin/discordgo"
+	"github.com/samber/lo"
 )
 
 var primaryColor = 0x39d353
@@ -32,19 +33,11 @@ func embedifyRank(data []lib.RankRecord, rng string) *discordgo.MessageEmbed {
 		)
 	}
 
-	var rngText string
-	switch rng {
-	case "weekly":
-		rngText = "Weekly Ranking"
-		break
-	case "monthly":
-		rngText = "Monthly Ranking"
-		break
-	case "all":
-		rngText = "Total Ranking"
-	default:
-		rngText = "Ranking"
-	}
+	rngText := lo.Switch[string, string](rng).
+		Case("all", "Total Ranking").
+		Case("weekly", "Weekly Ranking").
+		Case("monthly", "Monthly Ranking").
+		Default("Ranking")
 
 	return &discordgo.MessageEmbed{
 		Title:       rngText,
