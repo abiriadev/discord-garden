@@ -86,14 +86,17 @@ func main() {
 			}
 		},
 		"garden": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			fmt.Println(i.Member.User.ID)
 			if res, err := influxclient.Garden(i.Member.User.ID); err != nil {
 				s.InteractionRespond(i.Interaction, makeErrorResponse(err))
 			} else {
 				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: &discordgo.InteractionResponseData{
+						// Title:   "Title",
+						// Content: "akljfdjfka :gass1:",
 						Embeds: []*discordgo.MessageEmbed{
-							embedifyGarden(res, config.DiscordGuildId),
+							embedifyGarden(res),
 						},
 					},
 				})

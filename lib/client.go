@@ -142,7 +142,7 @@ func (c *InfluxClient) Garden(id string) ([]int, error) {
 		Window      string
 	}{
 		c.bucket,
-		"-30d",
+		"-29d",
 		c.measurement,
 		id,
 		"1d",
