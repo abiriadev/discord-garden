@@ -109,7 +109,7 @@ func (c *InfluxClient) Rank(rng string) ([]RankRecord, error) {
 		10,
 	})
 	if err != nil {
-		return nil, error
+		return nil, err
 	}
 
 	res, err := c.queryInner(query)
