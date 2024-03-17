@@ -2,6 +2,7 @@ package lib
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
@@ -79,7 +80,7 @@ type RankRecord struct {
 	Point int
 }
 
-func (c *InfluxClient) Rank(rng string) []RankRecord {
+func (c *InfluxClient) Rank(rng string) ([]RankRecord, error) {
 	var tmplPath, rQ string
 
 	switch rng {
@@ -93,7 +94,7 @@ func (c *InfluxClient) Rank(rng string) []RankRecord {
 		tmplPath = "./lib/queries/rank.flux"
 		rQ = "0"
 	default:
-		panic("unknown range")
+		return nil, errors.New("unknown range")
 	}
 
 	query, err := useTemplate(tmplPath, struct {
@@ -108,15 +109,15 @@ func (c *InfluxClient) Rank(rng string) []RankRecord {
 		10,
 	})
 	if err != nil {
-		panic(err)
+		return nil, error
 	}
 
 	res, err := c.queryInner(query)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	if len(res) != 1 {
-		panic("unexpected number of tables")
+		return nil, errors.New("unexpected number of tables")
 	}
 
 	return lo.Map(res[0], func(r *influxquery.FluxRecord, _ int) RankRecord {
@@ -129,7 +130,7 @@ func (c *InfluxClient) Rank(rng string) []RankRecord {
 			Id:    id,
 			Point: int(r.Value().(int64)),
 		}
-	})
+	}), nil
 }
 
 func (c *InfluxClient) Garden() []int {
