@@ -4,10 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/abiriadev/discord-garden/lib"
 	"github.com/bwmarrin/discordgo"
-	"github.com/influxdata/influxdb-client-go/v2/domain"
 	"github.com/samber/lo"
 )
 
@@ -127,21 +127,16 @@ func embedifyStatus(client lib.InfluxClient) (*discordgo.MessageEmbed, error) {
 		Fields: []*discordgo.MessageEmbedField{
 			&discordgo.MessageEmbedField{
 				Name:   "Influx",
+				Inline: false,
+			},
+			&discordgo.MessageEmbedField{
+				Name:   "name",
+				Value:  influx.Health.Name,
 				Inline: true,
 			},
 			&discordgo.MessageEmbedField{
-				Name:   "started",
-				Value:  influx.Ready.Started.Local().String(),
-				Inline: true,
-			},
-			&discordgo.MessageEmbedField{
-				Name:   "ready status",
-				Value:  string(lo.FromPtrOr(influx.Ready.Status, domain.ReadyStatus("null"))),
-				Inline: true,
-			},
-			&discordgo.MessageEmbedField{
-				Name:   "up",
-				Value:  lo.FromPtrOr(influx.Ready.Up, "null"),
+				Name:   "version",
+				Value:  lo.FromPtrOr(influx.Health.Version, "null"),
 				Inline: true,
 			},
 			&discordgo.MessageEmbedField{
@@ -150,23 +145,23 @@ func embedifyStatus(client lib.InfluxClient) (*discordgo.MessageEmbed, error) {
 				Inline: true,
 			},
 			&discordgo.MessageEmbedField{
-				Name:   "message",
-				Value:  lo.FromPtrOr(influx.Health.Message, "null"),
-				Inline: true,
-			},
-			&discordgo.MessageEmbedField{
-				Name:   "name",
-				Value:  influx.Health.Name,
-				Inline: true,
-			},
-			&discordgo.MessageEmbedField{
 				Name:   "status",
 				Value:  string(influx.Health.Status),
 				Inline: true,
 			},
 			&discordgo.MessageEmbedField{
-				Name:   "version",
-				Value:  lo.FromPtrOr(influx.Health.Version, "null"),
+				Name:   "started",
+				Value:  influx.Ready.Started.Local().Format(time.RFC3339),
+				Inline: true,
+			},
+			&discordgo.MessageEmbedField{
+				Name:   "up",
+				Value:  lo.FromPtrOr(influx.Ready.Up, "null"),
+				Inline: true,
+			},
+			&discordgo.MessageEmbedField{
+				Name:   "message",
+				Value:  lo.FromPtrOr(influx.Health.Message, "null"),
 				Inline: true,
 			},
 		},
