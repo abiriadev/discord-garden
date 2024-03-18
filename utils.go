@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -45,6 +46,9 @@ func optMap(
 }
 
 func makeErrorResponse(err error) *discordgo.InteractionResponse {
+	if err == nil {
+		err = errors.New("unknown error")
+	}
 	return &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
