@@ -6,6 +6,7 @@ import (
 
 	"github.com/abiriadev/discord-garden/lib"
 	"github.com/bwmarrin/discordgo"
+	"github.com/influxdata/influxdb-client-go/v2/domain"
 	"github.com/samber/lo"
 )
 
@@ -131,22 +132,22 @@ func embedifyStatus(client lib.InfluxClient) (*discordgo.MessageEmbed, error) {
 			},
 			&discordgo.MessageEmbedField{
 				Name:   "ready status",
-				Value:  string(*influx.Ready.Status),
+				Value:  string(lo.FromPtrOr(influx.Ready.Status, domain.ReadyStatus("null"))),
 				Inline: true,
 			},
 			&discordgo.MessageEmbedField{
 				Name:   "up",
-				Value:  *influx.Ready.Up,
+				Value:  lo.FromPtrOr(influx.Ready.Up, "null"),
 				Inline: true,
 			},
 			&discordgo.MessageEmbedField{
 				Name:   "commit",
-				Value:  *influx.Health.Commit,
+				Value:  lo.FromPtrOr(influx.Health.Commit, "null"),
 				Inline: true,
 			},
 			&discordgo.MessageEmbedField{
 				Name:   "message",
-				Value:  *influx.Health.Message,
+				Value:  lo.FromPtrOr(influx.Health.Message, "null"),
 				Inline: true,
 			},
 			&discordgo.MessageEmbedField{
@@ -161,7 +162,7 @@ func embedifyStatus(client lib.InfluxClient) (*discordgo.MessageEmbed, error) {
 			},
 			&discordgo.MessageEmbedField{
 				Name:   "version",
-				Value:  *influx.Health.Version,
+				Value:  lo.FromPtrOr(influx.Health.Version, "null"),
 				Inline: true,
 			},
 		},
