@@ -112,6 +112,20 @@ func main() {
 				})
 			}
 		},
+		"status": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			if res, err := embedifyStatus(influxclient); err != nil {
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Embeds: []*discordgo.MessageEmbed{
+							res,
+						},
+					},
+				})
+			} else {
+				s.InteractionRespond(i.Interaction, makeErrorResponse(err))
+			}
+		},
 	}
 
 	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
