@@ -114,6 +114,8 @@ func main() {
 		},
 		"status": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			if res, err := embedifyStatus(influxclient); err != nil {
+				s.InteractionRespond(i.Interaction, makeErrorResponse(err))
+			} else {
 				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: &discordgo.InteractionResponseData{
@@ -122,8 +124,6 @@ func main() {
 						},
 					},
 				})
-			} else {
-				s.InteractionRespond(i.Interaction, makeErrorResponse(err))
 			}
 		},
 	}
