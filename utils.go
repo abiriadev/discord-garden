@@ -3,6 +3,8 @@ package main
 import (
 	"errors"
 	"fmt"
+	"runtime"
+	"strconv"
 	"strings"
 	"time"
 
@@ -126,6 +128,25 @@ func embedifyStatus(client lib.InfluxClient) (*discordgo.MessageEmbed, error) {
 		Title: "Status",
 		Fields: []*discordgo.MessageEmbedField{
 			&discordgo.MessageEmbedField{
+				Name:   "Runtime",
+				Inline: false,
+			},
+			&discordgo.MessageEmbedField{
+				Name:   "version",
+				Value:  runtime.Version(),
+				Inline: true,
+			},
+			&discordgo.MessageEmbedField{
+				Name:   "goroutines",
+				Value:  strconv.Itoa(runtime.NumGoroutine()),
+				Inline: true,
+			},
+			&discordgo.MessageEmbedField{
+				Name:   "cgo calls",
+				Value:  strconv.Itoa(int(runtime.NumCgoCall())),
+				Inline: true,
+			},
+			&discordgo.MessageEmbedField{
 				Name:   "Influx",
 				Inline: false,
 			},
@@ -165,6 +186,7 @@ func embedifyStatus(client lib.InfluxClient) (*discordgo.MessageEmbed, error) {
 				Inline: true,
 			},
 		},
-		Color: primaryColor,
+		Color:     primaryColor,
+		Timestamp: time.Now().Format(time.RFC3339),
 	}, nil
 }
