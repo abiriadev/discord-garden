@@ -1,6 +1,7 @@
 services:
   influx:
     image: influxdb:2.7.4
+    restart: always
     ports:
       - 8086:8086
     environment:
@@ -8,7 +9,13 @@ services:
       DOCKER_INFLUXDB_INIT_PASSWORD: ${INFLUX_PASSWORD}
       DOCKER_INFLUXDB_INIT_ORG: cl
       DOCKER_INFLUXDB_INIT_BUCKET: activities
-      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INfLUX_TOKEN}
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUX_TOKEN}
   bot:
     build: .
     restart: always
+    environment:
+      INFLUX_HOST: http://influx:8086
+      INFLUX_ORG: cl
+      INFLUX_BUCKET: activities
+      INFLUX_TOKEN: ${INfLUX_TOKEN}
+      DISCORD_TOKEN: ${DISCORD_TOKEN}
