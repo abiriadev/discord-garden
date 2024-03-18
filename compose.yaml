@@ -18,5 +18,5 @@ services:
       INFLUX_ORG: cl
       INFLUX_BUCKET: activities
       INFLUX_MEASUREMENT: chat
-      INFLUX_TOKEN: ${INfLUX_TOKEN}
+      INFLUX_TOKEN: ${INFLUX_TOKEN}
       DISCORD_TOKEN: ${DISCORD_TOKEN}
