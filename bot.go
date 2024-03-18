@@ -18,7 +18,6 @@ type Config struct {
 	InfluxOrg         string `envconfig:"INFLUX_ORG"         required:"true"`
 	InfluxBucket      string `envconfig:"INFLUX_BUCKET"      required:"true"`
 	InfluxMeasurement string `envconfig:"INFLUX_MEASUREMENT" required:"true"`
-	DiscordGuildId    string `envconfig:"DISCORD_GUILD_ID"   required:"true"`
 	DiscordToken      string `envconfig:"DISCORD_TOKEN"      required:"true"`
 }
 
@@ -47,7 +46,7 @@ func main() {
 		panic(err)
 	}
 
-	s.Identify.Intents = discordgo.IntentsGuildMessages
+	s.Identify.Intents = discordgo.IntentsGuildMessages | discordgo.IntentsGuildMembers
 
 	for _, handler := range handlers {
 		s.AddHandler(handler)
