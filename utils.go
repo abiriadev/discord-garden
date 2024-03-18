@@ -110,3 +110,61 @@ func embedifyGarden(data []int, username string) *discordgo.MessageEmbed {
 		Color:       primaryColor,
 	}
 }
+
+func embedifyStatus(client lib.InfluxClient) (*discordgo.MessageEmbed, error) {
+	influx, error := client.Status()
+	if error != nil {
+		return nil, error
+	}
+
+	return &discordgo.MessageEmbed{
+		Title: "Status",
+		Fields: []*discordgo.MessageEmbedField{
+			&discordgo.MessageEmbedField{
+				Name:   "Influx",
+				Inline: true,
+			},
+			&discordgo.MessageEmbedField{
+				Name:   "started",
+				Value:  influx.Ready.Started.Local().String(),
+				Inline: true,
+			},
+			&discordgo.MessageEmbedField{
+				Name:   "ready status",
+				Value:  string(*influx.Ready.Status),
+				Inline: true,
+			},
+			&discordgo.MessageEmbedField{
+				Name:   "up",
+				Value:  *influx.Ready.Up,
+				Inline: true,
+			},
+			&discordgo.MessageEmbedField{
+				Name:   "commit",
+				Value:  *influx.Health.Commit,
+				Inline: true,
+			},
+			&discordgo.MessageEmbedField{
+				Name:   "message",
+				Value:  *influx.Health.Message,
+				Inline: true,
+			},
+			&discordgo.MessageEmbedField{
+				Name:   "name",
+				Value:  influx.Health.Name,
+				Inline: true,
+			},
+			&discordgo.MessageEmbedField{
+				Name:   "status",
+				Value:  string(influx.Health.Status),
+				Inline: true,
+			},
+			&discordgo.MessageEmbedField{
+				Name:   "version",
+				Value:  *influx.Health.Version,
+				Inline: true,
+			},
+		},
+		Color: primaryColor,
+	}, nil
+}
