@@ -5,6 +5,7 @@ services:
     ports:
       - 8086:8086
     environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
       DOCKER_INFLUXDB_INIT_USERNAME: admin
       DOCKER_INFLUXDB_INIT_PASSWORD: ${INFLUX_PASSWORD}
       DOCKER_INFLUXDB_INIT_ORG: cl
