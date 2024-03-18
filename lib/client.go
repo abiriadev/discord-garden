@@ -8,10 +8,12 @@ import (
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/influxdata/influxdb-client-go/v2/api"
 	influxquery "github.com/influxdata/influxdb-client-go/v2/api/query"
+	"github.com/influxdata/influxdb-client-go/v2/domain"
 	"github.com/samber/lo"
 )
 
 type InfluxClient struct {
+	client      influxdb2.Client
 	qapi        api.QueryAPI
 	wapi        api.WriteAPIBlocking
 	bucket      string
@@ -35,6 +37,7 @@ func NewInfluxClient(
 	)
 
 	return InfluxClient{
+		client:      client,
 		qapi:        client.QueryAPI(config.Org),
 		wapi:        client.WriteAPIBlocking(config.Org, config.Bucket),
 		bucket:      config.Bucket,
@@ -159,7 +162,7 @@ func (c *InfluxClient) Garden(id string) ([]int, error) {
 		return nil, err
 	}
 	if len(res[0]) != 30 {
-		return nil, errors.New("Invalid result size")
+		return nil, errors.New("invalid result size")
 	}
 
 	return lo.Map(res[0], func(r *influxquery.FluxRecord, _ int) int {
@@ -169,4 +172,27 @@ func (c *InfluxClient) Garden(id string) ([]int, error) {
 			return int(int(v))
 		}
 	}), nil
+}
+
+type InfluxStatus struct {
+	Ready  domain.Ready
+	Health domain.HealthCheck
+}
+
+func (c *InfluxClient) Status() (InfluxStatus, error) {
+	ctx := context.Background()
+	ready, err := c.client.Ready(ctx)
+	if err != nil {
+		return InfluxStatus{}, err
+	}
+
+	health, err := c.client.Health(ctx)
+	if err != nil {
+		return InfluxStatus{}, err
+	}
+
+	return InfluxStatus{
+		Ready:  *ready,
+		Health: *health,
+	}, nil
 }
