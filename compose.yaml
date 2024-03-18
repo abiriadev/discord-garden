@@ -11,7 +11,7 @@ services:
       DOCKER_INFLUXDB_INIT_BUCKET: activities
       DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUX_TOKEN}
   bot:
-    build: .
+    image: ghcr.io/abiriadev/discord-garden:v0.1.2
     restart: always
     environment:
       INFLUX_HOST: http://influx:8086
