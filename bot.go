@@ -90,21 +90,21 @@ func main() {
 		},
 		"garden": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			optMap := optMap(i)
-			var targetUser *discordgo.User
+			var uid string
 			if user, ok := optMap["user"]; ok {
-				targetUser = user.UserValue(nil)
+				uid = user.UserValue(nil).ID
 			} else {
-				targetUser = i.Member.User
+				uid = i.Member.User.ID
 			}
 
-			if res, err := influxclient.Garden(targetUser.ID); err != nil {
+			if res, err := influxclient.Garden(uid); err != nil {
 				s.InteractionRespond(i.Interaction, makeErrorResponse(err))
 			} else {
 				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: &discordgo.InteractionResponseData{
 						Embeds: []*discordgo.MessageEmbed{
-							embedifyGarden(res, targetUser.Username),
+							embedifyGarden(res, uid),
 						},
 					},
 				})
