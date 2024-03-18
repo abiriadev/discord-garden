@@ -158,6 +158,9 @@ func (c *InfluxClient) Garden(id string) ([]int, error) {
 	if len(res) != 1 {
 		return nil, err
 	}
+	if len(res[0]) != 30 {
+		return nil, errors.New("Invalid result size")
+	}
 
 	return lo.Map(res[0], func(r *influxquery.FluxRecord, _ int) int {
 		if v, ok := r.Value().(int64); !ok {
