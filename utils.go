@@ -96,6 +96,10 @@ func embedifyRank(data []lib.RankRecord, rng string) *discordgo.MessageEmbed {
 }
 
 func embedifyGarden(data []int, username string) *discordgo.MessageEmbed {
+	for len(data) < 30 {
+		data = append([]int{0}, data...)
+	}
+
 	res := lib.ApplyHistogram(data, len(grassEmojiList)-1, lib.BinaryMeanHistogram{})
 
 	eRes := lo.Map(res, func(v, _ int) string {
