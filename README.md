@@ -9,8 +9,8 @@ $ DISCORD_TOKEN=<token> INFLUX_TOKEN=<influx token> INFLUX_PASSWORD=<password> d
 
 ## Stack
 
--   [https://github.com/bwmarrin/discordgo](discordgo)
--   [https://github.com/influxdata/influxdb](InfluxDB)
+-   [discordgo](https://github.com/bwmarrin/discordgo)
+-   [InfluxDB](https://github.com/influxdata/influxdb)
 
 ## Plan
 
