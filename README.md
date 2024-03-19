@@ -1,4 +1,5 @@
-# Discord Garden
+<h1 align="center">🌱 Discord Garden</h1>
+<p align="center">Show your discord activities as a GitHub-calendar-like garden</p>
 
 ## Run
 
