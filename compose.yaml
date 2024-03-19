@@ -5,19 +5,19 @@ services:
     ports:
       - 8086:8086
     environment:
-      DOCKER_INFLUXDB_INIT_MODE: setup
-      DOCKER_INFLUXDB_INIT_USERNAME: admin
-      DOCKER_INFLUXDB_INIT_PASSWORD: ${INFLUX_PASSWORD}
-      DOCKER_INFLUXDB_INIT_ORG: cl
-      DOCKER_INFLUXDB_INIT_BUCKET: activities
-      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUX_TOKEN}
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUX_PASSWORD}
+      - DOCKER_INFLUXDB_INIT_ORG=cl
+      - DOCKER_INFLUXDB_INIT_BUCKET=activities
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUX_TOKEN}
   bot:
     image: ghcr.io/abiriadev/discord-garden:v0.1.2
     restart: always
     environment:
-      INFLUX_HOST: http://influx:8086
-      INFLUX_ORG: cl
-      INFLUX_BUCKET: activities
-      INFLUX_MEASUREMENT: chat
-      INFLUX_TOKEN: ${INFLUX_TOKEN}
-      DISCORD_TOKEN: ${DISCORD_TOKEN}
+      - INFLUX_HOST=http://influx:8086
+      - INFLUX_ORG=cl
+      - INFLUX_BUCKET=activities
+      - INFLUX_MEASUREMENT=chat
+      - INFLUX_TOKEN=${INFLUX_TOKEN}
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
