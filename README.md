@@ -28,4 +28,4 @@ $ DISCORD_TOKEN=<token> INFLUX_TOKEN=<influx token> INFLUX_PASSWORD=<password> d
 
 ## License
 
-[![GitHub](https://img.shields.io/github/license/abiriadev/pia?color=39d353&style=for-the-badge)](./LICENSE)
+[![GitHub](https://img.shields.io/github/license/abiriadev/discord-garden?color=39d353&style=for-the-badge)](./LICENSE)
